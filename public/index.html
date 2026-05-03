@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Welcome to OIDC Auth Server. Securely manage your identity and applications.">
+  <title>Welcome | OIDC Auth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card home-card">
+    <header class="header">
+      <div class="icon" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <h1>OIDC Auth Server</h1>
+      <p class="subtitle">Secure identity and access management</p>
+    </header>
+
+    <div class="form">
+      <p class="intro-text">
+        Get started by choosing an option below:
+      </p>
+
+      <div class="start-steps">
+        <p class="steps-title">Steps to start:</p>
+        <ol class="steps-list">
+          <li>Sign up and create your user account.</li>
+          <li>You will be redirected to Developer Console.</li>
+          <li>Register your app to get <code>clientId</code> and <code>clientSecret</code>.</li>
+          <li>Start sign-in with <code>/v1/authenticate?client_id=YOUR_CLIENT_ID</code>.</li>
+        </ol>
+      </div>
+      
+      <a href="/signup.html" class="btn">Create an account</a>
+      
+      <div class="divider"><span>OR</span></div>
+      
+      <a href="/developer-console" class="btn btn-outline">Developer Console</a>
+    </div>
+
+    <footer class="footer">
+      Already have an account? <a href="/v1/authenticate">Sign in</a>
+    </footer>
+  </main>
+</body>
+</html>

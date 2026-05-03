@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Register your application to obtain API credentials.">
+  <title>Developer Console | OIDC Auth</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card">
+    <header class="header">
+      <a href="/" class="icon" aria-label="Go to home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+        </svg>
+      </a>
+      <h1>Register Application</h1>
+      <p class="subtitle">Enter details to create API credentials</p>
+    </header>
+
+    <form class="form" id="dev-console-form" novalidate>
+      <div class="field">
+        <label for="applicationName">Application Name</label>
+        <input type="text" id="applicationName" name="applicationName" placeholder="My App" required aria-required="true">
+      </div>
+
+      <div class="field">
+        <label for="baseUrl">Base URL</label>
+        <input type="url" id="baseUrl" name="baseUrl" placeholder="https://myapp.com" required aria-required="true">
+      </div>
+
+      <div class="field">
+        <label for="redirectUrl">Redirect URL</label>
+        <input type="url" id="redirectUrl" name="redirectUrl" placeholder="https://myapp.com/callback" required aria-required="true">
+      </div>
+
+      <button type="submit" id="submitBtn">
+        <span class="spinner" id="spinner" aria-hidden="true"></span>
+        <span id="btnText">Create Credentials</span>
+      </button>
+    </form>
+
+    <section id="response-container" class="response" aria-live="polite">
+      <h2>Your Credentials</h2>
+      <pre id="response-data"></pre>
+    </section>
+
+    <footer class="footer">
+      <a href="/">Return to home</a>
+    </footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('dev-console-form');
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const responseContainer = document.getElementById('response-container');
+    const responseData = document.getElementById('response-data');
+    const query = new URLSearchParams(window.location.search);
+    const signedUpUserId = query.get('user_id');
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      spinner.style.display = loading ? 'block' : 'none';
+      btnText.textContent = loading ? 'Creating…' : 'Create Credentials';
+    }
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+
+      if (!signedUpUserId) {
+        responseData.textContent = 'Error: Missing user_id. Please sign up first.';
+        responseContainer.style.display = 'block';
+        return;
+      }
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      data.userId = signedUpUserId;
+
+      setLoading(true);
+
+      try {
+        const response = await fetch('/developer-console', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'An unknown error occurred.');
+        }
+
+        responseData.textContent = JSON.stringify(result, null, 2);
+        responseContainer.style.display = 'block';
+
+      } catch (error) {
+        responseData.textContent = 'Error: ' + error.message;
+        responseContainer.style.display = 'block';
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to your account to continue." />
+  <title>Sign In | {{APP_NAME}}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <main class="card">
+    <header class="header">
+      <a href="/" class="icon" aria-label="Go to home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a5 5 0 1 0 0 10A5 5 0 0 0 12 2z"/>
+          <path d="M20 21a8 8 0 1 0-16 0"/>
+        </svg>
+      </a>
+      <h1>Login to {{APP_NAME}}</h1>
+      <p class="subtitle">Sign in to your account to continue</p>  
+    </header>
+
+    <form class="form" id="loginForm" novalidate>
+      <div id="errorMsg" class="error-msg" role="alert" aria-live="polite"></div>
+
+      <div class="field">
+        <label for="email">Email address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          placeholder="you@example.com"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <div class="field">
+        <div class="field-row between">
+          <label for="password">Password</label>
+          <a href="#" class="forgot">Forgot password?</a>
+        </div>
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          placeholder="••••••••"
+          required
+          aria-required="true"
+        />
+      </div>
+
+      <button type="submit" id="submitBtn">
+        <span class="spinner" id="spinner" aria-hidden="true"></span>
+        <span id="btnText">Sign in</span>
+      </button>
+    </form>
+
+    <footer class="footer">
+      Don't have an account? <a id="signupLink" href="/signup.html">Sign up</a>
+    </footer>
+  </main>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btnText');
+    const errorMsg = document.getElementById('errorMsg');
+    const signupLink = document.getElementById('signupLink');
+
+
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get('client_id');
+
+    if (clientId) {
+      signupLink.href = `/signup.html?client_id=${encodeURIComponent(clientId)}`;
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    function hideError() {
+      errorMsg.style.display = 'none';
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      spinner.style.display = loading ? 'block' : 'none';
+      btnText.textContent = loading ? 'Signing in…' : 'Sign in';
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      hideError();
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showError('Please fill in all fields.');
+        return;
+      }
+
+      if (!clientId) {
+        showError('Missing client_id in URL.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch('/v1/authenticate/sign-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            password,
+            client_id: clientId,
+          }),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          showError(data.message || 'Something went wrong. Please try again.');
+        } else if (data.redirect) {
+          btnText.textContent = 'Redirecting...';
+          window.location.href = data.redirect;
+        }
+      } catch {
+        showError('Something went wrong. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+</body>
+</html>
